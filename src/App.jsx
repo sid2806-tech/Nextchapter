@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Compass, 
-  Target, 
-  Rocket, 
-  MessageSquare, 
-  LayoutDashboard, 
-  ShieldCheck, 
-  TrendingUp, 
-  Clock, 
-  User, 
-  Search, 
-  Bell, 
-  ChevronRight, 
-  Play, 
-  Pause, 
+import React, { useState, useEffect } from 'react';
+import {
+  Compass,
+  Target,
+  Rocket,
+  MessageSquare,
+  LayoutDashboard,
+  ShieldCheck,
+  TrendingUp,
+  Clock,
+  User,
+  Search,
+  Bell,
+  ChevronRight,
+  Play,
+  Pause,
   RotateCcw,
   Volume2,
   Trophy,
@@ -30,6 +30,10 @@ import {
   Database,
   Palette
 } from 'lucide-react';
+
+// Import Firebase
+import { auth, googleProvider } from './lib/firebase';
+import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
 
 // --- Components ---
 
@@ -57,7 +61,7 @@ const Card = ({ children, className = "" }) => (
 const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    fullName: 'Siddhant Patil',
+    fullName: auth.currentUser?.displayName || 'Student',
     grade: '',
     strengths: '',
     challenges: '',
@@ -96,24 +100,24 @@ const Onboarding = ({ onComplete }) => {
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-2xl font-bold mb-2">Basic Info</h2>
               <p className="text-gray-500 mb-8">Tell us a bit about yourself to personalize your experience.</p>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                     placeholder="Enter your full name"
                     value={formData.fullName}
-                    onChange={e => setFormData({...formData, fullName: e.target.value})}
+                    onChange={e => setFormData({ ...formData, fullName: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Current Grade/Standard</label>
-                  <select 
+                  <select
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/20 outline-none appearance-none"
                     value={formData.grade}
-                    onChange={e => setFormData({...formData, grade: e.target.value})}
+                    onChange={e => setFormData({ ...formData, grade: e.target.value })}
                   >
                     <option value="">Select your grade</option>
                     {[...Array(12)].map((_, i) => (
@@ -130,24 +134,24 @@ const Onboarding = ({ onComplete }) => {
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-2xl font-bold mb-2">Academic Life</h2>
               <p className="text-gray-500 mb-8">Tell us about your academic strengths and hurdles.</p>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">What are your favorite subjects or strengths?</label>
-                  <textarea 
+                  <textarea
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/20 outline-none h-24 resize-none"
                     placeholder="e.g. Mathematics, Creative Writing, Problem Solving"
                     value={formData.strengths}
-                    onChange={e => setFormData({...formData, strengths: e.target.value})}
+                    onChange={e => setFormData({ ...formData, strengths: e.target.value })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">What subjects do you find challenging?</label>
-                  <textarea 
+                  <textarea
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/20 outline-none h-24 resize-none"
                     placeholder="e.g. History dates, Physics formulas..."
                     value={formData.challenges}
-                    onChange={e => setFormData({...formData, challenges: e.target.value})}
+                    onChange={e => setFormData({ ...formData, challenges: e.target.value })}
                   />
                 </div>
               </div>
@@ -158,30 +162,23 @@ const Onboarding = ({ onComplete }) => {
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-2xl font-bold mb-2">Future Goals</h2>
               <p className="text-gray-500 mb-8">Let's look ahead to where you want to be.</p>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Any particular stream or path you're interested in?</label>
-                  <select 
+                  <select
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/20 outline-none appearance-none"
                     value={formData.stream}
-                    onChange={e => setFormData({...formData, stream: e.target.value})}
-                  >
-                    <option value="">Choose an interest</option>
-                    <option>Science / Engineering</option>
-                    <option>Commerce / Business</option>
-                    <option>Arts / Humanities</option>
-                    <option>Creative / Design</option>
-                    <option>Medical / Biology</option>
-                  </select>
+                    onChange={e => setFormData({ ...formData, stream: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Where do you see yourself in 5 years?</label>
-                  <textarea 
+                  <textarea
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500/20 outline-none h-24 resize-none"
                     placeholder="e.g. Working as a software engineer, traveling the world..."
                     value={formData.vision}
-                    onChange={e => setFormData({...formData, vision: e.target.value})}
+                    onChange={e => setFormData({ ...formData, vision: e.target.value })}
                   />
                 </div>
               </div>
@@ -194,8 +191,8 @@ const Onboarding = ({ onComplete }) => {
                 <ChevronLeft size={20} /> Back
               </Button>
             )}
-            <Button 
-              className="flex-1 h-12" 
+            <Button
+              className="flex-1 h-12"
               onClick={step === 3 ? () => onComplete(formData) : nextStep}
               disabled={step === 1 && (!formData.fullName || !formData.grade)}
             >
@@ -235,7 +232,7 @@ const LandingPage = ({ onStart }) => {
             with Pathway Buddy
           </h1>
           <p className="text-xl text-gray-500 mb-12 max-w-2xl mx-auto leading-relaxed">
-            The ultimate guidance platform for students. Choose your stream, track your 
+            The ultimate guidance platform for students. Choose your stream, track your
             growth, and navigate through academic challenges with your personal AI buddy.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -323,10 +320,10 @@ const PathResults = ({ onRegenerate }) => {
               </div>
               <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">{rec.match}</span>
             </div>
-            
+
             <h3 className="text-xl font-bold mb-3">{rec.title}</h3>
             <p className="text-sm text-gray-500 mb-6 leading-relaxed line-clamp-3">{rec.desc}</p>
-            
+
             <div className="bg-gray-50 p-4 rounded-xl mb-6 flex-1">
               <p className="text-xs text-gray-600 leading-relaxed italic border-l-2 border-emerald-300 pl-3">
                 {rec.analysis}
@@ -375,18 +372,17 @@ const Sidebar = ({ activeTab, setTab, onLogout }) => {
         <Rocket size={24} />
         <span>PathwayBuddy</span>
       </div>
-      
+
       <div className="flex-1 px-4 py-2 space-y-1">
         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-4 mb-4 mt-4">Learning Modules</div>
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setTab(item.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${
-              activeTab === item.id 
-              ? 'bg-emerald-50 text-emerald-700' 
-              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium ${activeTab === item.id
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+              }`}
           >
             <item.icon size={20} />
             {item.label}
@@ -412,10 +408,37 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
   const [showNotification, setShowNotification] = useState(false);
   const [pathState, setPathState] = useState('ready'); // ready, generating, results
-  const [userData, setUserData] = useState({ fullName: 'Siddhant Patil', grade: 'Grade 10' });
+  const [userData, setUserData] = useState({ fullName: '', grade: '' });
+  const [firebaseUser, setFirebaseUser] = useState(null);
 
-  const startJourney = () => setView('onboarding');
-  
+  // Monitor Firebase Auth State
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      if (user) {
+        setUserData({
+          fullName: user.displayName || 'Friend',
+          grade: 'Student'
+        });
+        // If logged in, go to dashboard directly (or onboarding if we had a flag)
+        if (view === 'landing') setView('dashboard');
+      } else {
+        setView('landing');
+      }
+    });
+    return () => unsubscribe();
+  }, [view]); // depend on view to avoid resetting during active session interactions if needed
+
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      // Auth state listener will handle the transition
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Login failed. Please try again.");
+    }
+  };
+
   const handleOnboardingComplete = (data) => {
     setUserData(data);
     setView('dashboard');
@@ -429,17 +452,18 @@ export default function App() {
   };
 
   const logout = () => {
+    signOut(auth);
     setView('landing');
     setPathState('ready');
   };
 
-  if (view === 'landing') return <LandingPage onStart={startJourney} />;
+  if (view === 'landing' || !firebaseUser) return <LandingPage onStart={handleLogin} />;
   if (view === 'onboarding') return <Onboarding onComplete={handleOnboardingComplete} />;
 
   return (
     <div className="flex min-h-screen bg-[#FDFDFD] text-[#1A1A1A]">
       <Sidebar activeTab={activeTab} setTab={setActiveTab} onLogout={logout} />
-      
+
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Toast Notification */}
         {showNotification && (
@@ -454,13 +478,13 @@ export default function App() {
         <header className="h-20 border-b border-gray-100 flex items-center justify-between px-8 bg-white/80 backdrop-blur-md sticky top-0 z-10">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search paths, tips, or Buddy..." 
+            <input
+              type="text"
+              placeholder="Search paths, tips, or Buddy..."
               className="w-full bg-gray-50 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             />
           </div>
-          
+
           <div className="flex items-center gap-6">
             <button className="relative text-gray-400 hover:text-emerald-600">
               <Bell size={22} />
@@ -471,9 +495,13 @@ export default function App() {
                 <div className="text-sm font-bold">{userData.fullName}</div>
                 <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{userData.grade || 'N/A'}</div>
               </div>
-              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-bold">
-                {userData.fullName?.split(' ').map(n => n[0]).join('') || 'U'}
-              </div>
+              {firebaseUser?.photoURL ? (
+                <img src={firebaseUser.photoURL} alt="Profile" className="w-10 h-10 rounded-xl" />
+              ) : (
+                <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-bold">
+                  {userData.fullName?.split(' ').map(n => n[0]).join('') || 'U'}
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -491,12 +519,12 @@ export default function App() {
                       {pathState === 'generating' ? 'Analyzing your potential...' : 'Ready to find your path?'}
                     </h2>
                     <p className="text-gray-500 mb-8 leading-relaxed">
-                      {pathState === 'generating' 
+                      {pathState === 'generating'
                         ? 'Buddy is processing your strengths, challenges, and goals to find your perfect matches.'
                         : 'Click the button below to let Buddy analyze your profile and suggest the best academic streams and careers tailored for you.'}
                     </p>
-                    <Button 
-                      className="w-full h-12" 
+                    <Button
+                      className="w-full h-12"
                       onClick={generatePaths}
                       disabled={pathState === 'generating'}
                     >
@@ -528,21 +556,21 @@ export default function App() {
                 </div>
                 {/* Dashboard content placeholder */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                   <Card className="hover:border-emerald-200 cursor-pointer" onClick={() => setActiveTab('finder')}>
-                     <Compass className="text-emerald-600 mb-4" />
-                     <h3 className="font-bold">Path Finder</h3>
-                     <p className="text-sm text-gray-500">Discover your career path</p>
-                   </Card>
-                   <Card>
-                     <ShieldCheck className="text-emerald-600 mb-4" />
-                     <h3 className="font-bold">Resilience Hub</h3>
-                     <p className="text-sm text-gray-500">Turn failures into futures</p>
-                   </Card>
-                   <Card>
-                     <Trophy className="text-emerald-600 mb-4" />
-                     <h3 className="font-bold">Growth Zone</h3>
-                     <p className="text-sm text-gray-500">Extra activities & skills</p>
-                   </Card>
+                  <Card className="hover:border-emerald-200 cursor-pointer" onClick={() => setActiveTab('finder')}>
+                    <Compass className="text-emerald-600 mb-4" />
+                    <h3 className="font-bold">Path Finder</h3>
+                    <p className="text-sm text-gray-500">Discover your career path</p>
+                  </Card>
+                  <Card>
+                    <ShieldCheck className="text-emerald-600 mb-4" />
+                    <h3 className="font-bold">Resilience Hub</h3>
+                    <p className="text-sm text-gray-500">Turn failures into futures</p>
+                  </Card>
+                  <Card>
+                    <Trophy className="text-emerald-600 mb-4" />
+                    <h3 className="font-bold">Growth Zone</h3>
+                    <p className="text-sm text-gray-500">Extra activities & skills</p>
+                  </Card>
                 </div>
               </div>
             )}
