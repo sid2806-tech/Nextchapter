@@ -40,6 +40,13 @@ Since your app uses Firebase and Gemini, strictly **REQUIRED** for the app to wo
     *   *Do this for all `VITE_` variables.*
 5.  **Re-deploy**: If you added variables *after* the deployment started, you must trigger a new deploy (Deploys > Trigger deploy > Clear cache and deploy site) for them to take effect.
 
+### Troubleshooting Vercel Builds
+If you see **"Installing dependencies... error"**:
+1.  This is likely because the project uses cutting-edge versions (React 19, Vite 7).
+2.  I have added a `vercel.json` file to fix this automatically.
+3.  **Action**: Push the new `vercel.json` file to GitHub and Vercel will trigger a new deploy that should work.
+4.  If it still fails, go to Vercel Dashboard > Settings > General > **Node.js Version** and set it to **20.x** or **22.x**.
+
 ## Post-Deployment Check
 
 *   **Routing**: If refreshing a page (like `/pathfinder`) gives a 404 error, you need a `_redirects` file.
